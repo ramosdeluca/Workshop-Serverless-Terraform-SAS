@@ -1,0 +1,30 @@
+service: reservas # NOTE: update this with your service name
+#app: your-app-name
+#tenant: your-tenant-name
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+# frameworkVersion: "=X.X.X"
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+
+  stage: dev
+  region: us-east-1
+
+  environment:
+   DYNAMODB_RESERVAS: ${ssm:${self:custom.stage}-dynamodb-reservas-table}
+
+functions:
+  reservas:
+    role: ${ssm:${self:custom.stage}-reservas-iam-role}   
+    handler: reservas/handler.reservas
+
+    events:
+      - http:
+          path: reservas/create
+          method: post
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
